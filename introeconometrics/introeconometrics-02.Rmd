@@ -1,0 +1,120 @@
+---
+title: "Intro to Econometrics with R Ch. 2"
+output: html_notebook
+---
+
+#2.1 Summary statistics
+
+```{r}
+library(ggplot2)
+```
+
+Let's use that mpg dataset
+
+```{r}
+mpg
+```
+
+
+```{r}
+mpg$cty
+```
+
+We can get mean and median:
+
+```{r}
+mean(mpg$cty)
+median(mpg$cty)
+```
+
+We can get variance, SD, interquartile range, minimum, maximum, and range:
+
+```{r}
+var(mpg$cty)
+sd(mpg$cty)
+IQR(mpg$cty)
+min(mpg$cty)
+max(mpg$cty)
+range(mpg$cty)
+```
+
+
+#2.2 Plotting
+
+You can plot very simple things using R's built-in plot facilities:
+
+```{r}
+hist(mpg$cty)
+```
+
+
+And we can pretty up a plot:
+
+```{r}
+hist(mpg$cty,
+     xlab   = "Miles Per Gallon (City)",
+     main   = "Histogram of MPG (City)", # main title
+     breaks = 12,   # how many breaks?
+     col    = "red",
+     border = "blue")
+```
+
+
+For a categorical variable, you can use barplot:
+
+```{r}
+barplot(table(mpg$drv),
+        xlab   = "Drivetrain (f = FWD, r = RWD, 4 = 4WD)",
+        ylab   = "Frequency",
+        main   = "Drivetrains",
+        col    = "dodgerblue",
+        border = "darkorange")
+```
+
+
+You can find out how many unique values are in each column:
+
+```{r}
+unique(mpg$drv)
+```
+
+
+You can use a boxplot to visualize a single numerical variable.
+
+The box is the interquartile range, the whiskers are 1.5x IQR, the midline is the median, and the circles are outliers from the IQR.
+
+```{r}
+boxplot(mpg$hwy)
+```
+
+
+And you can use this to compare variables:
+
+```{r}
+boxplot(hwy ~ class, data = mpg)
+```
+
+Note it didn't print 2 classes:
+
+```{r}
+unique(mpg$class)
+```
+
+
+The text was too big. 
+
+We can fix that:
+
+```{r}
+par(cex.axis=0.8)
+boxplot(hwy ~ class, data = mpg)
+```
+
+## 2.2.4 scatterplots
+
+
+
+
+
+
+
