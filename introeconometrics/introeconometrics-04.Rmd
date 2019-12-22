@@ -1,0 +1,9 @@
+---
+title: "Intro to Econometrics with R Ch. 3"
+output: html_notebook
+---
+
+Ch. 4: Multiple Regression
+
+
+

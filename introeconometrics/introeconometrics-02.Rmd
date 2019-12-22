@@ -112,6 +112,147 @@ boxplot(hwy ~ class, data = mpg)
 
 ## 2.2.4 scatterplots
 
+To visualize two variables:
+
+```{r}
+plot(hwy ~ displ, data = mpg)
+```
+
+
+```{r}
+plot(hwy ~ displ, data = mpg,
+     xlab = "Engine Displacement (in Liters)",
+     ylab = "Miles Per Gallon (Highway)",
+     main = "MPG (Highway) vs Engine Displacement",
+     pch  = 20,
+     cex  = 2,
+     col  = "dodgerblue")
+```
+
+## 2.2.5 ggplot
+
+You can do all that stuff using ggplot as well:
+
+```{r}
+ggplot(data = mpg, mapping = aes(x=displ,y=hwy)) +   
+  geom_point(color="blue",size=2) +     # how to show x and y?
+  scale_y_continuous(name="Miles Per Gallon (Highway)") +  
+  scale_x_continuous(name="Engine Displacement (in Liters)") + 
+  theme_bw() +    # change the background
+  ggtitle("MPG (Highway) vs Engine Displacement")   # add a title
+```
+
+#2.3 Summarizing two variables
+
+You can get covariance easy:
+
+```{r}
+cov(mpg$hwy,mpg$displ)
+```
+
+And correlation, which is scaleless:
+
+```{r}
+cor(mpg$hwy,mpg$displ)
+
+```
+
+
+# 2.4 The tidyverse
+
+You can do commands with tidy stuff instead:
+
+```{r}
+library(dplyr)
+```
+
+Here are the most fuel efficient vehicles, filtered:
+
+```{r}
+mpg %>% 
+  filter(hwy > 35) %>% 
+  select(manufacturer, model, year)
+```
+
+
+# 2.4.3 Tidy Example: Importing Non-Tidy Excel Data
+
+
+```{r}
+library(readxl)
+```
+
+
+```{r}
+tot_pop_raw = read_excel(
+                path = system.file(package="ScPoEconometrics",
+                                    "datasets","demo_gind.xls"), 
+                sheet="Data", # which sheet
+                range="A9:K68")  # which excel cell range to read
+names(tot_pop_raw)[1] <- "Country"   # lets rename the first column
+tot_pop_raw
+```
+
+This shows a tibble, which we encountered just above. The column names are Country,2008,2009,..., and the rows are numbered 1,2,3,.... Notice, in particular, that all columns seem to be of type <chr>, i.e. characters - a string, not a number! We’ll have to fix that, as this is clearly numeric data.
+
+Each year is a column name (like 2008) instead of all years being collected in one column year. We really would like to have several rows for each Country, one row per year. We want to gather() all years into a new column to tidy this up - and here is how:
+
+
+```{r}
+library(tidyr)   # for the gather function
+tot_pop = gather(tot_pop_raw, paste(2008:2017),key="year", value = "counts")
+tot_pop
+```
+
+convert chr to a number for population:
+
+```{r}
+tot_pop$counts = as.integer(tot_pop$counts)
+```
+
+###dplyr
+
+With dplyr you can do the following operations on data.frames and tibbles:
+
+Choose observations based on a certain value (i.e. subset): filter()
+Reorder rows: arrange()
+Select variables by name: select()
+Create new variables out of existing ones: mutate()
+Summarise variables: summarise()
+All of those verbs can be used with group_by(), where we apply the respective operation on a group of the dataframe/tibble. For example, on our tot_pop tibble we will now
+
+filter
+mutate
+and plot the resulting values
+Let’s get a plot of the populations of France, the UK and Italy over time, in terms of millions of people. We will make use of the piping syntax of dplyr which we introduced just above.
+
+
+```{r}
+library(dplyr)  # for %>%, filter, mutate, ...
+# 1. take the data.frame `tot_pop`
+tot_pop %>%
+  # 2. pipe it into the filter function
+  # filter on Country being one of "France","United Kingdom" or "Italy"
+  filter(Country %in% c("France","United Kingdom","Italy")) %>%
+  # 3. pipe the result into the mutate function
+  # create a new column called millions
+  mutate(millions = counts / 1e6) %>%
+  # 4. pipe the result into ggplot to make a plot
+  ggplot(mapping = aes(x=year,y=millions,color=Country,group=Country)) + geom_line(size=1)
+```
+
+How to find all NAs in a tibble:
+
+```{r}
+missings = tot_pop %>%
+  filter(is.na(counts)) %>%    # is.na(x) returns TRUE if x is NA
+  group_by(Country) %>%
+  summarise(n_missing = n(),years = paste(year,collapse = ", "))
+knitr:::kable(missings)     # knitr:::kable makes a nice table
+```
+
+
+
 
 
 

@@ -1,0 +1,153 @@
+---
+title: "Intro to Econometrics with R Ch. 3"
+output: html_notebook
+---
+
+
+The cars dataset is a bunch of cars, their speed, and how long it takes them to stop.
+
+```{r}
+View(cars)
+```
+
+
+How big is it?
+
+```{r}
+dim(cars)
+```
+
+fifty rows, two columns.
+
+## 3.1.2 how are speed and dist related?
+
+WE can start by plotting a graph:
+
+```{r}
+plot(dist ~ speed, data = cars,
+     xlab = "Speed (in Miles Per Hour)",
+     ylab = "Stopping Distance (in Feet)",
+     main = "Stopping Distance vs Speed",
+     pch  = 20,
+     cex  = 2,
+     col  = "red")
+```
+
+# 3.1 and 3.2 are mostly regression theory
+
+# 3.3 predictions and residuals
+
+```{r}
+all.equal(mean(ss$error), 0)
+```
+
+Fuck, they don't give you data for several chapters.
+
+Oh well.
+
+# 3.7 a log wage equation
+
+```{r}
+data("wage1", package = "wooldridge")   # load data
+```
+
+```{r}
+# a function that returns a plot
+plotfun <- function(wage1,log=FALSE,rug = TRUE){
+    y = wage1$wage
+    if (log){
+        y = log(wage1$wage)
+    }
+    plot(y = y,
+       x = wage1$educ, 
+       col = "red", pch = 21, bg = "grey",     
+       cex=1.25, xaxt="n", frame = FALSE,      # set default x-axis to none
+       main = ifelse(log,"log(Wages) vs. Education, 1976","Wages vs. Education, 1976"),
+       xlab = "years of education", 
+       ylab = ifelse(log,"Log Hourly wages","Hourly wages"))
+    axis(side = 1, at = c(0,6,12,18))         # add custom ticks to x axis
+    if (rug) rug(wage1$wage, side=2, col="red")        # add `rug` to y axis
+}
+
+par(mfcol = c(2,1))  # set up a plot with 2 panels
+# plot 1: standard scatter plot
+plotfun(wage1)
+
+# plot 2: add a panel with histogram+density
+hist(wage1$wage,prob = TRUE, col = "grey", border = "red", 
+     main = "Histogram of wages and Density",xlab = "hourly wage")
+lines(density(wage1$wage), col = "black", lw = 2)
+```
+
+The distribution of linear wage is skewed, obviously, cos money is like that.
+
+
+Let's do a first regression of wage vs education:
+
+```{r}
+hourly_wage <- lm(formula = wage ~ educ, data = wage1)
+plotfun(wage1)
+abline(hourly_wage, col = 'black', lw = 2) # add regression line
+```
+
+```{r}
+summary(hourly_wage)
+```
+
+
+Let's instead do a log regression. 
+
+The update function takes an existing lm object, like hourly_wage here, and updates the formula. Here the . on the right hand side means leave unchanged (so the RHS stays unchanged). 
+
+```{r}
+log_hourly_wage = update(hourly_wage, log(wage) ~ ., data = wage1)
+```
+
+Now this changes things:
+
+```{r}
+par(mfrow = c(1,2))
+
+plotfun(wage1,rug = FALSE)
+abline(hourly_wage, col = 'black', lw = 2) # add regression line
+
+plotfun(wage1,log = TRUE, rug = FALSE)
+abline(log_hourly_wage, col = 'black', lw = 2) # add regression line
+```
+
+
+```{r}
+summary(log_hourly_wage)
+```
+
+R-squared is a bit better.
+
+
+### CEO salaries
+
+Here's another dataset, for CEO salaries:
+
+```{r}
+data("ceosal1", package = "wooldridge")  
+#
+par(mfrow = c(1,2))
+#
+plot(salary ~ sales, data = ceosal1, main = "Sales vs Salaries",xaxt = "n",frame = FALSE)
+axis(1, at = c(0,40000, 80000))
+rug(ceosal1$salary,side = 2)
+rug(ceosal1$sales,side = 1)
+#
+plot(log(salary) ~ log(sales), data = ceosal1, main = "Log(Sales) vs Log(Salaries)")
+```
+
+```{r}
+summary(lm(log(salary) ~ log(sales), data=ceosal1))
+```
+
+
+
+
+
+
+
+
