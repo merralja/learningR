@@ -1,0 +1,160 @@
+---
+title: "Geocomputation with R chapter 2"
+output: html_notebook
+---
+
+
+```{r}
+devtools::install_github("Nowosad/spDataLarge")
+```
+
+```{r}
+library(sf)          # classes and functions for vector data
+library(raster)      # classes and functions for raster data
+library(spData)        # load geographic data
+library(spDataLarge)   # load larger geographic data
+```
+
+#2.2 vector data
+
+##2.2.1 sf package
+
+```{r}
+vignette("sf1")
+```
+
+```{r}
+nc <- st_read(system.file("shape/nc.shp", package="sf"))
+```
+
+```{r}
+class(nc)
+```
+
+```{r}
+print(nc[9:15], n = 3)
+```
+
+```{r}
+par(mar = c(0,0,1,0))
+plot(nc[1], reset = FALSE) # reset = FALSE: we want to add to a plot with a legend
+plot(nc[1,1], col = 'grey', add = TRUE)
+```
+
+
+```{r}
+nc[1,1]
+```
+
+forget about the rest of the vignette, I've seen it already....
+
+```{r}
+names(world)
+```
+```{r}
+plot(world)
+```
+
+And you can treat a spatial object like a dataframe. So you can query it for things.
+
+```{r}
+summary(world["lifeExp"])
+```
+
+let's go off on a tangent and do something from ch. 2 Into Econometrics R:
+
+```{r}
+par(cex.axis=0.8)
+boxplot(lifeExp ~ continent, data = world)
+```
+
+
+How to subset an sf:
+
+```{r}
+worldaf <- subset(world, continent == "Africa")
+plot(worldaf)
+```
+
+Ha! I even figured out how to do that myself!
+
+And let's do a dotplot of that:
+
+```{r}
+aa <- lm(formula = lifeExp ~ gdpPercap, data = worldaf)
+summary(aa)
+```
+
+```{r}
+plot(lifeExp ~ gdpPercap, data = worldaf)
+```
+
+Looks off. Let's log both:
+
+```{r}
+plot(log(lifeExp) ~ log(gdpPercap), data = worldaf)
+```
+
+Now regress this:
+
+```{r}
+aa <- lm(formula = log(lifeExp) ~ log(gdpPercap), data = worldaf)
+summary(aa)
+```
+
+
+Are we sure that both are distributed normally?
+
+```{r}
+library(ggplot2)
+```
+
+
+```{r}
+a <- ggplot(worldaf, aes(x = log(gdpPercap)))
+a <- a + geom_density() 
+a
+```
+
+```{r}
+a <- ggplot(worldaf, aes(x = log(lifeExp)))
+a <- a + geom_density() 
+a
+```
+
+Neither is really normal. But whatever.
+
+
+You can convert an sf object to an sp object easily:
+
+```{r}
+library(sp)
+world_sp = as(world, Class = "Spatial")
+```
+
+##2.2.3 basic map making
+
+You can join things together to make bigger things:
+
+```{r}
+world_asia = world[world$continent == "Asia", ]
+asia = st_union(world_asia)
+plot(asia)
+```
+
+
+Then plot asia on top of world:
+
+
+```{r}
+plot(world["pop"], reset = FALSE)
+plot(asia, add = TRUE, col = "red")
+```
+
+
+
+
+
+
+
+
